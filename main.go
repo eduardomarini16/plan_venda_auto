@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/xuri/excelize/v2"
 )
 
-func main() {
+func criarPlanilha() {
 
 	// cria um novo arquivo
 	f := excelize.NewFile()
@@ -67,4 +68,54 @@ func main() {
 	}
 
 	fmt.Println("Planilha criada com sucesso!!!")
+
+}
+
+func lerPlanilha() {
+
+	// abre planilha existente
+	f, err := excelize.OpenFile("controle_vendas_provedores.xlsx")
+	if err != nil {
+		log.Fatal("Erro ao abrir a planilha", err)
+	}
+
+	// lê todas as linhas da aba Vendas
+	rows, err := f.GetRows("Vendas")
+	if err != nil {
+		log.Fatal("Erro ao ler linhas da aba Vendas", err)
+	}
+
+	fmt.Println("Contatos com status NOVO:")
+	fmt.Println("-------------------------")
+
+	// percorre as linhas ignorando o cabeçalho
+	for i, row := range rows {
+		if i == 0 {
+			continue // pula cabeçalho
+		}
+
+		// verifica se linha tem pelo menos 7 colunas
+		if len(row) >= 7 {
+			status := row[6]
+			if status == "Novo" {
+				nomeProvedor := row[0]
+				telefone := row[3]
+
+				fmt.Printf("Provedor: %s | Telefone: %s\n", nomeProvedor, telefone)
+			}
+		}
+	}
+
+}
+
+func main() {
+
+	opcao := 2
+
+	if opcao == 1 {
+		criarPlanilha()
+	}
+	if opcao == 2 {
+		lerPlanilha()
+	}
 }
