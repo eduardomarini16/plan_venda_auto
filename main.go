@@ -20,8 +20,8 @@ func main() {
 		"Cidade",
 		"Estado",
 		"Telefone",
-		"Nome do COntato",
-		"Data do Primeiro COntato",
+		"Nome do Contato",
+		"Data do Primeiro Contato",
 		"Status",
 	}
 
