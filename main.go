@@ -112,10 +112,9 @@ func lerPlanilha() {
 				}
 			}
 		}
-
-		fmt.Println("---------------------")
-		fmt.Printf("Total de contatos novos: %d\n", contadorNovo)
 	}
+
+	fmt.Printf("Total de contatos novos: %d\n", contadorNovo)
 
 }
 
