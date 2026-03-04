@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/xuri/excelize/v2"
 )
@@ -88,6 +89,8 @@ func lerPlanilha() {
 	fmt.Println("Contatos com status NOVO:")
 	fmt.Println("-------------------------")
 
+	contadorNovo := 0
+
 	// percorre as linhas ignorando o cabeçalho
 	for i, row := range rows {
 		if i == 0 {
@@ -96,14 +99,22 @@ func lerPlanilha() {
 
 		// verifica se linha tem pelo menos 7 colunas
 		if len(row) >= 7 {
-			status := row[6]
-			if status == "Novo" {
-				nomeProvedor := row[0]
-				telefone := row[3]
+			if len(row) >= 7 {
+				status := strings.TrimSpace(row[6])
+				statusNormalizado := strings.ToLower(status)
 
-				fmt.Printf("Provedor: %s | Telefone: %s\n", nomeProvedor, telefone)
+				if statusNormalizado == "novo" {
+					nomeProvedor := row[0]
+					telefone := row[3]
+
+					fmt.Printf("Provedor: %s | Telefone: %s\n", nomeProvedor, telefone)
+					contadorNovo++
+				}
 			}
 		}
+
+		fmt.Println("---------------------")
+		fmt.Printf("Total de contatos novos: %d\n", contadorNovo)
 	}
 
 }
