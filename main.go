@@ -118,14 +118,65 @@ func lerPlanilha() {
 
 }
 
+func gerarAbaLigarHoje() {
+
+	f, err := excelize.OpenFile("controle_vendas_provedores.xlsx")
+	if err != nil {
+		log.Fatal("erro ao abrir a planilha", err)
+	}
+
+	index, err := f.NewSheet("Ligar Hoje")
+
+	f.SetActiveSheet(index)
+
+	rows, err := f.GetRows("Vendas")
+	if err != nil {
+		log.Fatal("erro ao ler aba vendas")
+	}
+
+	for i, headers := range rows[0] {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		f.SetCellValue("Ligar Hoje", cell, headers)
+	}
+
+	linhaNovaAba := 2
+
+	for i, row := range rows {
+		if i == 0 {
+			continue
+		}
+		if len(row) >= 7 {
+			status := strings.TrimSpace(row[6])
+			statusNormalizado := strings.ToLower(status)
+			if statusNormalizado == "novo" {
+				for colIndex, valorCelula := range row {
+					cell, _ := excelize.CoordinatesToCellName(colIndex+1, linhaNovaAba)
+					f.SetCellValue("Ligar Hoje", cell, valorCelula)
+				}
+				linhaNovaAba++
+			}
+		}
+	}
+
+	// salva alterações
+	err = f.Save()
+	if err != nil {
+		log.Fatal("erro ao salvar planilha", err)
+	}
+	fmt.Println("aba 'Ligar Hoje' criada com sucesso")
+
+}
+
 func main() {
 
-	opcao := 2
+	gerarAbaLigarHoje()
 
-	if opcao == 1 {
-		criarPlanilha()
-	}
-	if opcao == 2 {
-		lerPlanilha()
-	}
+	// opcao := 2
+
+	// if opcao == 1 {
+	// 	criarPlanilha()
+	// }
+	// if opcao == 2 {
+	// 	lerPlanilha()
+	// }
 }
