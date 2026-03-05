@@ -9,6 +9,16 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+type Contato struct {
+	Provedor string
+	Cidade   string
+	Estado   string
+	Telefone string
+	Contato  string
+	Data     string
+	Status   string
+}
+
 func criarPlanilha() error {
 
 	// cria um novo arquivo
@@ -72,18 +82,20 @@ func criarPlanilha() error {
 
 }
 
-func lerPlanilha() error {
+func lerPlanilha() ([]Contato, error) {
+
+	contatos := []Contato{}
 
 	// abre planilha existente
 	f, err := excelize.OpenFile("controle_vendas_provedores.xlsx")
 	if err != nil {
-		return fmt.Errorf("Erro ao abrir a planilha: %w", err)
+		return contatos, fmt.Errorf("Erro ao abrir a planilha: %w", err)
 	}
 
 	// lê todas as linhas da aba Vendas
 	rows, err := f.GetRows("Vendas")
 	if err != nil {
-		return fmt.Errorf("Erro ao ler linhas da aba Vendas: %w", err)
+		return contatos, fmt.Errorf("Erro ao ler linhas da aba Vendas: %w", err)
 	}
 
 	fmt.Println("Contatos com status NOVO:")
@@ -93,27 +105,31 @@ func lerPlanilha() error {
 
 	// percorre as linhas ignorando o cabeçalho
 	for i, row := range rows {
+
 		if i == 0 {
 			continue // pula cabeçalho
 		}
 
-		// verifica se linha tem pelo menos 7 colunas
 		if len(row) >= 7 {
-			status := strings.TrimSpace(row[6])
-			statusNormalizado := strings.ToLower(status)
+			contato := Contato{
+				Provedor: row[0],
+				Cidade:   row[1],
+				Estado:   row[2],
+				Telefone: row[3],
+				Contato:  row[4],
+				Data:     row[5],
+				Status:   row[6],
+			}
+			status := strings.ToLower(strings.TrimSpace(contato.Status))
 
-			if statusNormalizado == "novo" {
-				nomeProvedor := row[0]
-				telefone := row[3]
-
-				fmt.Printf("Provedor: %s | Telefone: %s\n", nomeProvedor, telefone)
+			if status == "novo" {
+				contatos = append(contatos, contato)
 				contadorNovo++
 			}
 		}
 	}
-
 	fmt.Printf("Total de contatos novos: %d\n", contadorNovo)
-	return nil
+	return contatos, nil
 }
 
 func gerarAbaLigarHoje() error {
@@ -228,7 +244,7 @@ func main() {
 	// rota listar novos
 	r.GET("/listar", func(c *gin.Context) {
 
-		err := lerPlanilha()
+		contatos, err := lerPlanilha()
 
 		if err != nil {
 			c.HTML(http.StatusOK, "index.html", gin.H{
@@ -238,7 +254,7 @@ func main() {
 		}
 
 		c.HTML(http.StatusOK, "index.html", gin.H{
-			"message": "Aba 'Ligar Hoje' gerada com sucesso!",
+			"contatos": contatos,
 		})
 	})
 

@@ -3,27 +3,108 @@
 
 <head>
     <title>Controle de Vendas</title>
+
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 40px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        table {
+            margin-top: 30px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .message {
+            margin-top: 20px;
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+
 </head>
 
 <body>
 
     <h1>Controle de Vendas - Provedores</h1>
 
+    <!-- criar planilha -->
     <form action="/criar" method="post">
         <button type="submit">Criar Planilha</button>
     </form>
 
-    <br>
-
+    <!-- gerar aba ligar hoje -->
     <form action="/gerar" method="post">
         <button type="submit">Gerar Aba Ligar Hoje</button>
     </form>
 
-    <br>
-
+    <!-- listar contatos novos -->
     <a href="/listar">
-        <button>Listar Contatos Novos (Terminal)</button>
+        <button>Listar Contatos Novos</button>
     </a>
+
+    <!-- mensagem do sistema -->
+    {{ if .message }}
+    <div class="message">
+        {{ .message }}
+    </div>
+    {{ end }}
+
+    <!-- tabela de contatos -->
+    {{ if .contatos }}
+
+    <h2>Contatos para ligar</h2>
+
+    <table>
+
+        <tr>
+            <th>Provedor</th>
+            <th>Cidade</th>
+            <th>Estado</th>
+            <th>Telefone</th>
+            <th>Contato</th>
+            <th>Data</th>
+            <th>Status</th>
+        </tr>
+
+        {{ range .contatos }}
+        <tr>
+            <td>{{ .Provedor }}</td>
+            <td>{{ .Cidade }}</td>
+            <td>{{ .Estado }}</td>
+            <td>{{ .Telefone }}</td>
+            <td>{{ .Contato }}</td>
+            <td>{{ .Data }}</td>
+            <td>{{ .Status }}</td>
+        </tr>
+        {{ end }}
+
+    </table>
+
+    {{ end }}
 
 </body>
 
