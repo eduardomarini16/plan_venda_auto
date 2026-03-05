@@ -9,7 +9,7 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func criarPlanilha() {
+func criarPlanilha() error {
 
 	// cria um novo arquivo
 	f := excelize.NewFile()
@@ -49,8 +49,7 @@ func criarPlanilha() {
 		},
 	})
 	if err != nil {
-		fmt.Println("Erro ao criar estilo:", err)
-		return
+		return fmt.Errorf("Erro ao criar estilo: %w", err)
 	}
 
 	f.SetCellStyle(sheet, "A1", "G1", style)
@@ -65,11 +64,11 @@ func criarPlanilha() {
 	// Salva o arquivo
 	err = f.SaveAs("controle_vendas_provedores.xlsx")
 	if err != nil {
-		fmt.Println("Erro ao salvar arquivo:", err)
-		return
+		return fmt.Errorf("Erro ao salvar arquivo: %w", err)
 	}
 
 	fmt.Println("Planilha criada com sucesso!!!")
+	return nil
 
 }
 
@@ -210,14 +209,37 @@ func main() {
 
 	// rota criar planilha
 	r.POST("/criar", func(c *gin.Context) {
-		criarPlanilha()
-		c.Redirect(http.StatusSeeOther, "/")
+
+		err := criarPlanilha()
+
+		if err != nil {
+			c.HTML(http.StatusOK, "index.html", gin.H{
+				"message": "Feche a planilha antes de gerar a aba.",
+			})
+			return
+
+		}
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"message": "Aba 'Ligar Hoje' gerada com sucesso!",
+		})
+
 	})
 
 	// rota listar novos
 	r.GET("/listar", func(c *gin.Context) {
-		lerPlanilha() // depois melhorar retorno
-		c.Redirect(http.StatusSeeOther, "/")
+
+		err := lerPlanilha()
+
+		if err != nil {
+			c.HTML(http.StatusOK, "index.html", gin.H{
+				"message": "Feche a planilha antes de gerar a aba.",
+			})
+			return
+		}
+
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"message": "Aba 'Ligar Hoje' gerada com sucesso!",
+		})
 	})
 
 	r.POST("/gerar", func(c *gin.Context) {
