@@ -211,6 +211,47 @@ func gerarAbaLigarHoje() error {
 	return nil
 }
 
+func atualizarStatus(provedor string) error {
+
+	// abre planilha existente
+	f, err := excelize.OpenFile("controle_vendas_provedores.xlsx")
+	if err != nil {
+		return fmt.Errorf("Erro ao abrir a planilha: %w", err)
+	}
+
+	// lê todas as linhas da aba Vendas
+	rows, err := f.GetRows("Vendas")
+	if err != nil {
+		return fmt.Errorf("Erro ao ler linhas da aba Vendas: %w", err)
+	}
+
+	// percorrer as linhas
+	for i, row := range rows {
+
+		if i == 0 {
+			continue
+		}
+
+		if len(row) < 7 {
+			continue
+		}
+
+		nomePlanilha := strings.TrimSpace(row[0])
+		nomeBusca := strings.TrimSpace(provedor)
+
+		if strings.EqualFold(nomePlanilha, nomeBusca) {
+			cellStatus, _ := excelize.CoordinatesToCellName(7, i+1)
+			f.SetCellValue("Vendas", cellStatus, "Ligado")
+		}
+	}
+
+	err = f.Save()
+	if err != nil {
+		return fmt.Errorf("erro ao salvar planilha: %w", err)
+	}
+	return nil
+}
+
 func main() {
 
 	r := gin.Default()
@@ -236,7 +277,7 @@ func main() {
 
 		}
 		c.HTML(http.StatusOK, "index.html", gin.H{
-			"message": "Aba 'Ligar Hoje' gerada com sucesso!",
+			"message": "Planilha gerada com sucesso!",
 		})
 
 	})
@@ -271,6 +312,26 @@ func main() {
 
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"message": "Aba 'Ligar Hoje' gerada com sucesso!",
+		})
+	})
+
+	r.POST("/liguei", func(c *gin.Context) {
+
+		provedor := c.PostForm("provedor")
+
+		err := atualizarStatus(provedor)
+		if err != nil {
+			c.HTML(http.StatusOK, "index.html", gin.H{
+				"message": "erro ao atualizar status",
+			})
+			return
+		}
+
+		contatos, _ := lerPlanilha()
+
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"message":  "status atualizado para ligado",
+			"contatos": contatos,
 		})
 	})
 

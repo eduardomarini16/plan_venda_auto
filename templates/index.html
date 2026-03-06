@@ -88,6 +88,7 @@
             <th>Contato</th>
             <th>Data</th>
             <th>Status</th>
+            <th>Ação</th>
         </tr>
 
         {{ range .contatos }}
@@ -99,6 +100,13 @@
             <td>{{ .Contato }}</td>
             <td>{{ .Data }}</td>
             <td>{{ .Status }}</td>
+
+            <td>
+                <form action="/liguei" method="post">
+                    <input type="hidden" name="provedor" value="{{ .Provedor }}">
+                    <button type="submit">Liguei</button>
+                </form>
+            </td>
         </tr>
         {{ end }}
 
