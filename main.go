@@ -205,6 +205,39 @@ func statusClass(status string) string {
 	return ""
 }
 
+func atualizarStatusNaoAtendeu(provedor string) error {
+	f, err := excelize.OpenFile("controle_vendas_provedores.xlsx")
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	rows, err := f.GetRows("Vendas")
+	if err != nil {
+		return err
+	}
+
+	for i, row := range rows {
+		if i == 0 {
+			continue
+		}
+
+		if len(row) < 7 {
+			continue
+		}
+
+		nomePlanilha := strings.TrimSpace(row[0])
+		nomeBusca := strings.TrimSpace(provedor)
+
+		if strings.EqualFold(nomePlanilha, nomeBusca) {
+			cellStatus, _ := excelize.CoordinatesToCellName(7, i+1)
+			f.SetCellValue("Vendas", cellStatus, "Não Atendeu")
+			break
+		}
+	}
+	return f.Save()
+}
+
 func main() {
 
 	r := gin.Default()
@@ -286,6 +319,24 @@ func main() {
 			return
 		}
 		c.HTML(http.StatusOK, "index.html", gin.H{
+			"contatos": contatos,
+		})
+	})
+
+	r.POST("/nao-atendeu", func(c *gin.Context) {
+		provedor := c.PostForm("provedor")
+
+		err := atualizarStatusNaoAtendeu(provedor)
+		if err != nil {
+			c.HTML(http.StatusOK, "index.html", gin.H{
+				"message": "erro ao atualizar status",
+			})
+			return
+		}
+		contatos, _ := lerPlanilha()
+
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"message":  "status atualizado para Não Atendeu",
 			"contatos": contatos,
 		})
 	})
