@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"text/template"
 
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
@@ -130,7 +131,7 @@ func listarPorStatus(statusBusca string) ([]Contato, error) {
 				Telefone: strings.TrimSpace(row[3]),
 				Contato:  strings.TrimSpace(row[4]),
 				Data:     strings.TrimSpace(row[5]),
-				Status:   status,
+				Status:   strings.Title(strings.ToLower(strings.TrimSpace(row[6]))),
 			}
 			contatos = append(contatos, contato)
 
@@ -184,9 +185,33 @@ func atualizarStatus(provedor string) error {
 	return nil
 }
 
+func statusClass(status string) string {
+
+	switch status {
+
+	case "Novo":
+		return "status-novo"
+
+	case "Em Ligação":
+		return "status-em-ligacao"
+
+	case "Ligado":
+		return "status-ligado"
+
+	case "Não Atendeu":
+		return "status-nao-atendeu"
+	}
+
+	return ""
+}
+
 func main() {
 
 	r := gin.Default()
+
+	r.SetFuncMap(template.FuncMap{
+		"statusClass": statusClass,
+	})
 
 	// carrega HTML
 	r.LoadHTMLGlob("templates/*")

@@ -1,9 +1,11 @@
 <!DOCTYPE html>
+
 <html>
 
 <head>
     <title>Controle de Vendas</title>
 
+    ```
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
@@ -61,26 +63,30 @@
             background-color: #FFD6D6;
         }
     </style>
+    ```
 
 </head>
 
 <body>
 
+    ```
     <h1>Controle de Vendas - Provedores</h1>
 
-    <!-- criar planilha -->
+    <!-- Criar planilha -->
     <form action="/criar" method="post">
         <button type="submit">Criar Planilha</button>
     </form>
 
-    <!-- filtro por status -->
+    <!-- Filtro por status -->
     <form action="/status" method="get">
         <label for="status">Filtrar por status:</label>
+
         <select name="status" id="status">
             <option value="novo">Novo</option>
             <option value="em ligação">Em ligação</option>
             <option value="ligado">Ligado</option>
         </select>
+
         <button type="submit">Filtrar</button>
     </form>
 
@@ -89,19 +95,20 @@
         <button>Listar Contatos Novos</button>
     </a>
 
-    <!-- mensagem do sistema -->
+    <!-- mensagem -->
     {{ if .message }}
     <div class="message">
         {{ .message }}
     </div>
     {{ end }}
 
-    <!-- tabela de contatos -->
+    <!-- tabela -->
     {{ if .contatos }}
 
-    <h2>Contatos para ligar</h2>
+    <h2>Contatos</h2>
 
     <table>
+
         <tr>
             <th>Provedor</th>
             <th>Cidade</th>
@@ -114,7 +121,9 @@
         </tr>
 
         {{ range .contatos }}
-        <tr>
+
+        <tr class="{{ statusClass .Status }}">
+
             <td>{{ .Provedor }}</td>
             <td>{{ .Cidade }}</td>
             <td>{{ .Estado }}</td>
@@ -124,16 +133,30 @@
             <td>{{ .Status }}</td>
 
             <td>
+
+                {{ if eq .Status "Novo" }}
+
                 <form action="/liguei" method="post">
                     <input type="hidden" name="provedor" value="{{ .Provedor }}">
                     <button type="submit">Liguei</button>
                 </form>
+
+                {{ else }}
+
+                -
+
+                {{ end }}
+
             </td>
+
         </tr>
+
         {{ end }}
+
     </table>
 
     {{ end }}
+    ```
 
 </body>
 
