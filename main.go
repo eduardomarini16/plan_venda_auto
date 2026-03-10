@@ -251,6 +251,20 @@ func main() {
 		})
 	})
 
+	r.GET("/status", func(c *gin.Context) {
+		status := c.Query("status")
+		contatos, err := listarPorStatus(status)
+		if err != nil {
+			c.HTML(http.StatusOK, "index.html", gin.H{
+				"message": "Erro ao filtrar contatos",
+			})
+			return
+		}
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"contatos": contatos,
+		})
+	})
+
 	r.Run(":8080")
 
 }
