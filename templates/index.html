@@ -56,9 +56,15 @@
         <button type="submit">Criar Planilha</button>
     </form>
 
-    <!-- gerar aba ligar hoje -->
-    <form action="/gerar" method="post">
-        <button type="submit">Gerar Aba Ligar Hoje</button>
+    <!-- filtro por status -->
+    <form action="/status" method="get">
+        <label for="status">Filtrar por status:</label>
+        <select name="status" id="status">
+            <option value="novo">Novo</option>
+            <option value="em ligação">Em ligação</option>
+            <option value="ligado">Ligado</option>
+        </select>
+        <button type="submit">Filtrar</button>
     </form>
 
     <!-- listar contatos novos -->
@@ -79,7 +85,6 @@
     <h2>Contatos para ligar</h2>
 
     <table>
-
         <tr>
             <th>Provedor</th>
             <th>Cidade</th>
@@ -109,7 +114,6 @@
             </td>
         </tr>
         {{ end }}
-
     </table>
 
     {{ end }}

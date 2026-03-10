@@ -84,131 +84,61 @@ func criarPlanilha() error {
 
 func lerPlanilha() ([]Contato, error) {
 
-	contatos := []Contato{}
-
-	// abre planilha existente
-	f, err := excelize.OpenFile("controle_vendas_provedores.xlsx")
+	contatos, err := listarPorStatus("novo")
 	if err != nil {
-		return contatos, fmt.Errorf("Erro ao abrir a planilha: %w", err)
+		return nil, err
 	}
 
-	// lê todas as linhas da aba Vendas
-	rows, err := f.GetRows("Vendas")
-	if err != nil {
-		return contatos, fmt.Errorf("Erro ao ler linhas da aba Vendas: %w", err)
-	}
+	fmt.Println("Contatos com o status 'NOVO: ")
+	fmt.Println("------------------------------")
+	fmt.Printf("Total de contatos novos: %d\n", len(contatos))
 
-	fmt.Println("Contatos com status NOVO:")
-	fmt.Println("-------------------------")
-
-	contadorNovo := 0
-
-	// percorre as linhas ignorando o cabeçalho
-	for i, row := range rows {
-
-		if i == 0 {
-			continue // pula cabeçalho
-		}
-
-		if len(row) >= 7 {
-			contato := Contato{
-				Provedor: row[0],
-				Cidade:   row[1],
-				Estado:   row[2],
-				Telefone: row[3],
-				Contato:  row[4],
-				Data:     row[5],
-				Status:   row[6],
-			}
-			status := strings.ToLower(strings.TrimSpace(contato.Status))
-
-			if status == "novo" {
-				contatos = append(contatos, contato)
-				contadorNovo++
-			}
-		}
-	}
-	fmt.Printf("Total de contatos novos: %d\n", contadorNovo)
 	return contatos, nil
 }
 
-func gerarAbaLigarHoje() error {
+func listarPorStatus(statusBusca string) ([]Contato, error) {
 
-	f, err := excelize.OpenFile("controle_vendas_provedores.xlsx")
+	file, err := excelize.OpenFile("controle_vendas_provedores.xlsx")
 	if err != nil {
-		return fmt.Errorf("erro ao abrir planilha: %w", err)
+		return nil, err
 	}
+	defer file.Close()
 
-	nomeAba := "Ligar Hoje"
-	indexExistente, err := f.GetSheetIndex(nomeAba)
+	rows, err := file.GetRows("Vendas")
 	if err != nil {
-		return fmt.Errorf("erro ao verificar aba: %w", err)
-
+		return nil, err
 	}
 
-	//Verifica se já existe
-	if indexExistente != -1 {
-		err = f.DeleteSheet(nomeAba)
-		if err != nil {
-			return fmt.Errorf("Erro ao deletar aba antiga: %w", err)
-		}
-		fmt.Println("Aba antiga removida.")
-	}
-
-	// cria aba nova limpa
-	index, err := f.NewSheet(nomeAba)
-	if err != nil {
-		return fmt.Errorf("Erro ao criar nova aba: %w", err)
-	}
-
-	f.SetActiveSheet(index)
-
-	rows, err := f.GetRows("Vendas")
-	if err != nil {
-		return fmt.Errorf("Erro ao ler aba Vendas: %w", err)
-	}
-
-	// copia cabeçalho
-	for i, header := range rows[0] {
-		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
-		f.SetCellValue(nomeAba, cell, header)
-	}
-
-	linhaNovaAba := 2
+	var contatos []Contato
 
 	for i, row := range rows {
 		if i == 0 {
 			continue
 		}
 
-		if len(row) >= 7 {
-			status := strings.TrimSpace(row[6])
-			statusNormalizado := strings.ToLower(status)
-
-			if statusNormalizado == "novo" {
-				// copia para aba nova
-				// copia para aba nova
-				for colIndex, valorCelula := range row {
-					cell, _ := excelize.CoordinatesToCellName(colIndex+1, linhaNovaAba)
-					f.SetCellValue(nomeAba, cell, valorCelula)
-				}
-
-				linhaNovaAba++
-
-				// atualiza status na aba original
-				cellStatus, _ := excelize.CoordinatesToCellName(7, i+1)
-				f.SetCellValue("Vendas", cellStatus, "Em ligação")
-			}
+		if len(row) < 7 {
+			continue
 		}
-	}
 
-	err = f.Save()
-	if err != nil {
-		return fmt.Errorf("Erro ao salvar planilha: %w", err)
-	}
+		status := strings.TrimSpace(row[6])
 
-	fmt.Println("Aba 'Ligar Hoje' atualizada com sucesso!")
-	return nil
+		if strings.EqualFold(status, statusBusca) {
+			contato := Contato{
+				Provedor: strings.TrimSpace(row[0]),
+				Cidade:   strings.TrimSpace(row[1]),
+				Estado:   strings.TrimSpace(row[2]),
+				Telefone: strings.TrimSpace(row[3]),
+				Contato:  strings.TrimSpace(row[4]),
+				Data:     strings.TrimSpace(row[5]),
+				Status:   status,
+			}
+			contatos = append(contatos, contato)
+
+		}
+
+	}
+	return contatos, nil
+
 }
 
 func atualizarStatus(provedor string) error {
@@ -218,6 +148,7 @@ func atualizarStatus(provedor string) error {
 	if err != nil {
 		return fmt.Errorf("Erro ao abrir a planilha: %w", err)
 	}
+	defer f.Close()
 
 	// lê todas as linhas da aba Vendas
 	rows, err := f.GetRows("Vendas")
@@ -242,6 +173,7 @@ func atualizarStatus(provedor string) error {
 		if strings.EqualFold(nomePlanilha, nomeBusca) {
 			cellStatus, _ := excelize.CoordinatesToCellName(7, i+1)
 			f.SetCellValue("Vendas", cellStatus, "Ligado")
+			break
 		}
 	}
 
@@ -296,22 +228,6 @@ func main() {
 
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"contatos": contatos,
-		})
-	})
-
-	r.POST("/gerar", func(c *gin.Context) {
-
-		err := gerarAbaLigarHoje()
-
-		if err != nil {
-			c.HTML(http.StatusOK, "index.html", gin.H{
-				"message": "Feche a planilha antes de gerar a aba.",
-			})
-			return
-		}
-
-		c.HTML(http.StatusOK, "index.html", gin.H{
-			"message": "Aba 'Ligar Hoje' gerada com sucesso!",
 		})
 	})
 
