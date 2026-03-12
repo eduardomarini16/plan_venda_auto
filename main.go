@@ -388,6 +388,14 @@ func main() {
 		})
 	})
 
+	r.GET("/", func(c *gin.Context) {
+		dash, _ := GerarDashboard()
+
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"dashboard": dash,
+		})
+	})
+
 	r.Run(":8080")
 
 }
