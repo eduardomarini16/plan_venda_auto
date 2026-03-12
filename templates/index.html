@@ -72,6 +72,28 @@
     ```
     <h1>Controle de Vendas - Provedores</h1>
 
+    <h2>Dashboard</h2>
+
+    <div style="display:flex; gap:20px; margin-bottom:20px;">
+
+        <div style="background:#D0E8FF; padding:15px;">
+            Novos: {{ .dashboard.Novos }}
+        </div>
+
+        <div style="background:#FFF8B0; padding:15px;">
+            Em ligação: {{ .dashboard.EmLigacao }}
+        </div>
+
+        <div style="background:#D4FFD4; padding:15px;">
+            Ligados: {{ .dashboard.Ligados }}
+        </div>
+
+        <div style="background:#FFD6D6; padding:15px;">
+            Não atendeu: {{ .dashboard.NaoAtendeu }}
+        </div>
+
+    </div>
+
     <!-- Criar planilha -->
     <form action="/criar" method="post">
         <button type="submit">Criar Planilha</button>
