@@ -159,6 +159,11 @@
 
                 {{ if eq .Status "Novo" }}
 
+                <form action="/em-ligacao" method="post" style="display:inline;">
+                    <input type="hidden" name="provedor" value="{{ .Provedor }}">
+                    <button type="submit">Em ligação</button>
+                </form>
+
                 <form action="/liguei" method="post" style="display:inline;">
                     <input type="hidden" name="provedor" value="{{ .Provedor }}">
                     <button type="submit">Liguei</button>

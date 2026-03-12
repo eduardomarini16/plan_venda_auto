@@ -212,6 +212,39 @@ func statusClass(status string) string {
 	return ""
 }
 
+func AtualizarStatusEmLigacao(provedor string) error {
+	f, err := excelize.OpenFile("controle_vendas_provedores.xlsx")
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	rows, err := f.GetRows("Vendas")
+	if err != nil {
+		return err
+	}
+
+	for i, row := range rows {
+		if i == 0 {
+			continue
+		}
+		if len(row) < 7 {
+			continue
+		}
+
+		nomePlanilha := strings.TrimSpace(row[0])
+		nomeBusca := strings.TrimSpace(provedor)
+
+		if strings.EqualFold(nomePlanilha, nomeBusca) {
+			cellStatus, _ := excelize.CoordinatesToCellName(7, i+1)
+			f.SetCellValue("Vendas", cellStatus, "Em ligação")
+			break
+		}
+	}
+	return f.Save()
+
+}
+
 func atualizarStatusNaoAtendeu(provedor string) error {
 	f, err := excelize.OpenFile("controle_vendas_provedores.xlsx")
 	if err != nil {
@@ -399,6 +432,22 @@ func main() {
 
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"message":   "status atualizado para Não Atendeu",
+			"contatos":  contatos,
+			"dashboard": dash,
+		})
+	})
+
+	r.POST("/em-ligacao", func(c *gin.Context) {
+
+		provedor := c.PostForm("provedor")
+
+		AtualizarStatusEmLigacao(provedor)
+
+		contatos, _ := lerPlanilha()
+		dash, _ := GerarDashboard()
+
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"message":   "Status atualizado para Em ligação",
 			"contatos":  contatos,
 			"dashboard": dash,
 		})
