@@ -296,10 +296,18 @@ func main() {
 	// carrega HTML
 	r.LoadHTMLGlob("templates/*")
 
-	// rota principal
 	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", nil)
+		dash, _ := GerarDashboard()
+
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"dashboard": dash,
+		})
 	})
+
+	// rota principal
+	// r.GET("/", func(c *gin.Context) {
+	// 	c.HTML(http.StatusOK, "index.html", nil)
+	// })
 
 	// rota criar planilha
 	r.POST("/criar", func(c *gin.Context) {
@@ -385,14 +393,6 @@ func main() {
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"message":  "status atualizado para Não Atendeu",
 			"contatos": contatos,
-		})
-	})
-
-	r.GET("/", func(c *gin.Context) {
-		dash, _ := GerarDashboard()
-
-		c.HTML(http.StatusOK, "index.html", gin.H{
-			"dashboard": dash,
 		})
 	})
 
