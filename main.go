@@ -245,6 +245,46 @@ func atualizarStatusNaoAtendeu(provedor string) error {
 	return f.Save()
 }
 
+func GerarDashboard() (Dashboard, error) {
+
+	file, err := excelize.OpenFile("controle_vendas_provedores.xlsx")
+	if err != nil {
+		return Dashboard{}, err
+	}
+	defer file.Close()
+
+	rows, err := file.GetRows("Vendas")
+	if err != nil {
+		return Dashboard{}, err
+	}
+
+	var dash Dashboard
+
+	for i, row := range rows {
+		if i == 0 {
+			continue
+		}
+
+		if len(row) < 7 {
+			continue
+		}
+
+		status := strings.TrimSpace(row[6])
+
+		switch strings.ToLower(status) {
+		case "novo":
+			dash.Novos++
+		case "em ligação":
+			dash.EmLigacao++
+		case "ligado":
+			dash.Ligados++
+		case "não atendeu":
+			dash.NaoAtendeu++
+		}
+	}
+	return dash, nil
+}
+
 func main() {
 
 	r := gin.Default()
