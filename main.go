@@ -331,10 +331,12 @@ func main() {
 	r.GET("/listar", func(c *gin.Context) {
 
 		contatos, err := lerPlanilha()
+		dash, _ := GerarDashboard()
 
 		if err != nil {
 			c.HTML(http.StatusOK, "index.html", gin.H{
-				"message": "Feche a planilha antes de gerar a aba.",
+				"message":   "Feche a planilha antes de gerar a aba.",
+				"dashboard": dash,
 			})
 			return
 		}
@@ -347,11 +349,13 @@ func main() {
 	r.POST("/liguei", func(c *gin.Context) {
 
 		provedor := c.PostForm("provedor")
+		dash, _ := GerarDashboard()
 
 		err := atualizarStatus(provedor)
 		if err != nil {
 			c.HTML(http.StatusOK, "index.html", gin.H{
-				"message": "erro ao atualizar status",
+				"message":   "erro ao atualizar status",
+				"dashboard": dash,
 			})
 			return
 		}
@@ -367,6 +371,7 @@ func main() {
 	r.GET("/status", func(c *gin.Context) {
 		status := c.Query("status")
 		contatos, err := listarPorStatus(status)
+		dash, _ := GerarDashboard()
 		if err != nil {
 			c.HTML(http.StatusOK, "index.html", gin.H{
 				"message": "Erro ao filtrar contatos",
@@ -374,12 +379,14 @@ func main() {
 			return
 		}
 		c.HTML(http.StatusOK, "index.html", gin.H{
-			"contatos": contatos,
+			"contatos":  contatos,
+			"dashboard": dash,
 		})
 	})
 
 	r.POST("/nao-atendeu", func(c *gin.Context) {
 		provedor := c.PostForm("provedor")
+		dash, _ := GerarDashboard()
 
 		err := atualizarStatusNaoAtendeu(provedor)
 		if err != nil {
@@ -391,8 +398,9 @@ func main() {
 		contatos, _ := lerPlanilha()
 
 		c.HTML(http.StatusOK, "index.html", gin.H{
-			"message":  "status atualizado para Não Atendeu",
-			"contatos": contatos,
+			"message":   "status atualizado para Não Atendeu",
+			"contatos":  contatos,
+			"dashboard": dash,
 		})
 	})
 
