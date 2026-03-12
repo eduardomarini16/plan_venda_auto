@@ -20,6 +20,13 @@ type Contato struct {
 	Status   string
 }
 
+type Dashboard struct {
+	Novos      int
+	EmLigacao  int
+	Ligados    int
+	NaoAtendeu int
+}
+
 func criarPlanilha() error {
 
 	// cria um novo arquivo
