@@ -11,13 +11,15 @@ import (
 )
 
 type Contato struct {
-	Provedor string
-	Cidade   string
-	Estado   string
-	Telefone string
-	Contato  string
-	Data     string
-	Status   string
+	Provedor   string
+	Cidade     string
+	Estado     string
+	Telefone   string
+	Contato    string
+	Data       string
+	Produto    string
+	Status     string
+	Observacao string
 }
 
 type Dashboard struct {
@@ -43,7 +45,9 @@ func criarPlanilha() error {
 		"Telefone",
 		"Nome do Contato",
 		"Data do Primeiro Contato",
+		"Produto",
 		"Status",
+		"Observação",
 	}
 
 	// preencher os cabeçalhos
@@ -70,7 +74,7 @@ func criarPlanilha() error {
 		return fmt.Errorf("Erro ao criar estilo: %w", err)
 	}
 
-	f.SetCellStyle(sheet, "A1", "G1", style)
+	f.SetCellStyle(sheet, "A1", "I1", style)
 
 	// ajusta largura das colunas
 	f.SetColWidth(sheet, "A", "A", 25)
@@ -78,6 +82,8 @@ func criarPlanilha() error {
 	f.SetColWidth(sheet, "D", "D", 18)
 	f.SetColWidth(sheet, "E", "E", 22)
 	f.SetColWidth(sheet, "F", "G", 20)
+	f.SetColWidth(sheet, "H", "H", 18)
+	f.SetColWidth(sheet, "I", "I", 30)
 
 	// Salva o arquivo
 	err = f.SaveAs("controle_vendas_provedores.xlsx")
@@ -124,21 +130,23 @@ func listarPorStatus(statusBusca string) ([]Contato, error) {
 			continue
 		}
 
-		if len(row) < 7 {
+		if len(row) < 9 {
 			continue
 		}
 
-		status := strings.TrimSpace(row[6])
+		status := strings.TrimSpace(row[7])
 
 		if strings.EqualFold(status, statusBusca) {
 			contato := Contato{
-				Provedor: strings.TrimSpace(row[0]),
-				Cidade:   strings.TrimSpace(row[1]),
-				Estado:   strings.TrimSpace(row[2]),
-				Telefone: strings.TrimSpace(row[3]),
-				Contato:  strings.TrimSpace(row[4]),
-				Data:     strings.TrimSpace(row[5]),
-				Status:   strings.Title(strings.ToLower(strings.TrimSpace(row[6]))),
+				Provedor:   strings.TrimSpace(row[0]),
+				Cidade:     strings.TrimSpace(row[1]),
+				Estado:     strings.TrimSpace(row[2]),
+				Telefone:   strings.TrimSpace(row[3]),
+				Contato:    strings.TrimSpace(row[4]),
+				Data:       strings.TrimSpace(row[5]),
+				Produto:    strings.TrimSpace(row[6]),
+				Status:     strings.Title(strings.ToLower(strings.TrimSpace(row[7]))),
+				Observacao: strings.TrimSpace(row[8]),
 			}
 			contatos = append(contatos, contato)
 
@@ -171,7 +179,7 @@ func atualizarStatus(provedor string) error {
 			continue
 		}
 
-		if len(row) < 7 {
+		if len(row) < 9 {
 			continue
 		}
 
@@ -179,7 +187,7 @@ func atualizarStatus(provedor string) error {
 		nomeBusca := strings.TrimSpace(provedor)
 
 		if strings.EqualFold(nomePlanilha, nomeBusca) {
-			cellStatus, _ := excelize.CoordinatesToCellName(7, i+1)
+			cellStatus, _ := excelize.CoordinatesToCellName(8, i+1)
 			f.SetCellValue("Vendas", cellStatus, "Ligado")
 			break
 		}
@@ -228,7 +236,7 @@ func AtualizarStatusEmLigacao(provedor string) error {
 		if i == 0 {
 			continue
 		}
-		if len(row) < 7 {
+		if len(row) < 9 {
 			continue
 		}
 
@@ -236,7 +244,7 @@ func AtualizarStatusEmLigacao(provedor string) error {
 		nomeBusca := strings.TrimSpace(provedor)
 
 		if strings.EqualFold(nomePlanilha, nomeBusca) {
-			cellStatus, _ := excelize.CoordinatesToCellName(7, i+1)
+			cellStatus, _ := excelize.CoordinatesToCellName(8, i+1)
 			f.SetCellValue("Vendas", cellStatus, "Em ligação")
 			break
 		}
@@ -262,7 +270,7 @@ func atualizarStatusNaoAtendeu(provedor string) error {
 			continue
 		}
 
-		if len(row) < 7 {
+		if len(row) < 9 {
 			continue
 		}
 
@@ -270,7 +278,7 @@ func atualizarStatusNaoAtendeu(provedor string) error {
 		nomeBusca := strings.TrimSpace(provedor)
 
 		if strings.EqualFold(nomePlanilha, nomeBusca) {
-			cellStatus, _ := excelize.CoordinatesToCellName(7, i+1)
+			cellStatus, _ := excelize.CoordinatesToCellName(8, i+1)
 			f.SetCellValue("Vendas", cellStatus, "Não Atendeu")
 			break
 		}
@@ -298,11 +306,11 @@ func GerarDashboard() (Dashboard, error) {
 			continue
 		}
 
-		if len(row) < 7 {
+		if len(row) < 9 {
 			continue
 		}
 
-		status := strings.TrimSpace(row[6])
+		status := strings.TrimSpace(row[7])
 
 		switch strings.ToLower(status) {
 		case "novo":
