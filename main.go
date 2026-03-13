@@ -23,10 +23,12 @@ type Contato struct {
 }
 
 type Dashboard struct {
-	Novos      int
-	EmLigacao  int
-	Ligados    int
-	NaoAtendeu int
+	Novos          int
+	EmContato      int
+	Orcamento      int
+	Negociacao     int
+	Clientes       int
+	NaoInteressado int
 }
 
 func criarPlanilha() error {
@@ -134,9 +136,13 @@ func listarPorStatus(statusBusca string) ([]Contato, error) {
 			continue
 		}
 
-		status := strings.TrimSpace(row[7])
+		statusPlanilha := strings.ToLower(strings.TrimSpace(row[7]))
+		statusBusca = strings.ToLower(strings.TrimSpace(statusBusca))
 
-		if strings.EqualFold(status, statusBusca) {
+		// fmt.Println(statusBusca)
+		// fmt.Println(statusPlanilha)
+
+		if strings.Contains(statusPlanilha, statusBusca) {
 			contato := Contato{
 				Provedor:   strings.TrimSpace(row[0]),
 				Cidade:     strings.TrimSpace(row[1]),
@@ -145,7 +151,7 @@ func listarPorStatus(statusBusca string) ([]Contato, error) {
 				Contato:    strings.TrimSpace(row[4]),
 				Data:       strings.TrimSpace(row[5]),
 				Produto:    strings.TrimSpace(row[6]),
-				Status:     strings.Title(strings.ToLower(strings.TrimSpace(row[7]))),
+				Status:     strings.TrimSpace(row[7]),
 				Observacao: strings.TrimSpace(row[8]),
 			}
 			contatos = append(contatos, contato)
@@ -157,24 +163,19 @@ func listarPorStatus(statusBusca string) ([]Contato, error) {
 
 }
 
-func atualizarStatus(provedor string) error {
-
-	// abre planilha existente
+func AtualizarStatusGenerico(provedor string, novoStatus string) error {
 	f, err := excelize.OpenFile("controle_vendas_provedores.xlsx")
 	if err != nil {
-		return fmt.Errorf("Erro ao abrir a planilha: %w", err)
+		return err
 	}
 	defer f.Close()
 
-	// lê todas as linhas da aba Vendas
 	rows, err := f.GetRows("Vendas")
 	if err != nil {
-		return fmt.Errorf("Erro ao ler linhas da aba Vendas: %w", err)
+		return err
 	}
 
-	// percorrer as linhas
 	for i, row := range rows {
-
 		if i == 0 {
 			continue
 		}
@@ -184,20 +185,14 @@ func atualizarStatus(provedor string) error {
 		}
 
 		nomePlanilha := strings.TrimSpace(row[0])
-		nomeBusca := strings.TrimSpace(provedor)
 
-		if strings.EqualFold(nomePlanilha, nomeBusca) {
+		if strings.EqualFold(nomePlanilha, provedor) {
 			cellStatus, _ := excelize.CoordinatesToCellName(8, i+1)
-			f.SetCellValue("Vendas", cellStatus, "Ligado")
+			f.SetCellValue("Vendas", cellStatus, novoStatus)
 			break
 		}
 	}
-
-	err = f.Save()
-	if err != nil {
-		return fmt.Errorf("erro ao salvar planilha: %w", err)
-	}
-	return nil
+	return f.Save()
 }
 
 func statusClass(status string) string {
@@ -207,14 +202,20 @@ func statusClass(status string) string {
 	case "Novo":
 		return "status-novo"
 
-	case "Em Ligação":
-		return "status-em-ligacao"
+	case "Em contato":
+		return "status-contato"
 
-	case "Ligado":
-		return "status-ligado"
+	case "Orçamento enviado":
+		return "status-orcamento"
 
-	case "Não Atendeu":
-		return "status-nao-atendeu"
+	case "Negociação":
+		return "status-negociacao"
+
+	case "Cliente":
+		return "status-cliente"
+
+	case "Não interessado":
+		return "status-nao-interessado"
 	}
 
 	return ""
@@ -253,39 +254,6 @@ func AtualizarStatusEmLigacao(provedor string) error {
 
 }
 
-func atualizarStatusNaoAtendeu(provedor string) error {
-	f, err := excelize.OpenFile("controle_vendas_provedores.xlsx")
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	rows, err := f.GetRows("Vendas")
-	if err != nil {
-		return err
-	}
-
-	for i, row := range rows {
-		if i == 0 {
-			continue
-		}
-
-		if len(row) < 9 {
-			continue
-		}
-
-		nomePlanilha := strings.TrimSpace(row[0])
-		nomeBusca := strings.TrimSpace(provedor)
-
-		if strings.EqualFold(nomePlanilha, nomeBusca) {
-			cellStatus, _ := excelize.CoordinatesToCellName(8, i+1)
-			f.SetCellValue("Vendas", cellStatus, "Não Atendeu")
-			break
-		}
-	}
-	return f.Save()
-}
-
 func GerarDashboard() (Dashboard, error) {
 
 	file, err := excelize.OpenFile("controle_vendas_provedores.xlsx")
@@ -310,17 +278,21 @@ func GerarDashboard() (Dashboard, error) {
 			continue
 		}
 
-		status := strings.TrimSpace(row[7])
+		status := strings.ToLower(strings.TrimSpace(row[7]))
 
-		switch strings.ToLower(status) {
-		case "novo":
+		switch {
+		case strings.Contains(status, "novo"):
 			dash.Novos++
-		case "em ligação":
-			dash.EmLigacao++
-		case "ligado":
-			dash.Ligados++
-		case "não atendeu":
-			dash.NaoAtendeu++
+		case strings.Contains(status, "contato"):
+			dash.EmContato++
+		case strings.Contains(status, "orç"):
+			dash.Orcamento++
+		case strings.Contains(status, "negoc"):
+			dash.Negociacao++
+		case strings.Contains(status, "client"):
+			dash.Clientes++
+		case strings.Contains(status, "interess"):
+			dash.NaoInteressado++
 		}
 	}
 	return dash, nil
@@ -334,9 +306,9 @@ func main() {
 		"statusClass": statusClass,
 	})
 
-	// carrega HTML
 	r.LoadHTMLGlob("templates/*")
 
+	// HOME
 	r.GET("/", func(c *gin.Context) {
 		dash, _ := GerarDashboard()
 
@@ -345,12 +317,7 @@ func main() {
 		})
 	})
 
-	// rota principal
-	// r.GET("/", func(c *gin.Context) {
-	// 	c.HTML(http.StatusOK, "index.html", nil)
-	// })
-
-	// rota criar planilha
+	// CRIAR PLANILHA
 	r.POST("/criar", func(c *gin.Context) {
 
 		err := criarPlanilha()
@@ -360,15 +327,14 @@ func main() {
 				"message": "Feche a planilha antes de gerar a aba.",
 			})
 			return
-
 		}
+
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"message": "Planilha gerada com sucesso!",
 		})
-
 	})
 
-	// rota listar novos
+	// LISTAR
 	r.GET("/listar", func(c *gin.Context) {
 
 		contatos, err := lerPlanilha()
@@ -376,91 +342,64 @@ func main() {
 
 		if err != nil {
 			c.HTML(http.StatusOK, "index.html", gin.H{
-				"message":   "Feche a planilha antes de gerar a aba.",
+				"message":   "Erro ao ler planilha",
 				"dashboard": dash,
 			})
 			return
 		}
 
 		c.HTML(http.StatusOK, "index.html", gin.H{
-			"contatos": contatos,
+			"contatos":  contatos,
+			"dashboard": dash,
 		})
 	})
 
-	r.POST("/liguei", func(c *gin.Context) {
-
-		provedor := c.PostForm("provedor")
-		dash, _ := GerarDashboard()
-
-		err := atualizarStatus(provedor)
-		if err != nil {
-			c.HTML(http.StatusOK, "index.html", gin.H{
-				"message":   "erro ao atualizar status",
-				"dashboard": dash,
-			})
-			return
-		}
-
-		contatos, _ := lerPlanilha()
-
-		c.HTML(http.StatusOK, "index.html", gin.H{
-			"message":  "status atualizado para ligado",
-			"contatos": contatos,
-		})
-	})
-
+	// FILTRAR STATUS
 	r.GET("/status", func(c *gin.Context) {
+
 		status := c.Query("status")
+
 		contatos, err := listarPorStatus(status)
 		dash, _ := GerarDashboard()
+
 		if err != nil {
 			c.HTML(http.StatusOK, "index.html", gin.H{
 				"message": "Erro ao filtrar contatos",
 			})
 			return
 		}
+
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"contatos":  contatos,
 			"dashboard": dash,
 		})
 	})
 
-	r.POST("/nao-atendeu", func(c *gin.Context) {
+	// ATUALIZAR STATUS
+	r.POST("/atualizar-status", func(c *gin.Context) {
+
 		provedor := c.PostForm("provedor")
+		status := c.PostForm("status")
+
+		err := AtualizarStatusGenerico(provedor, status)
 		dash, _ := GerarDashboard()
 
-		err := atualizarStatusNaoAtendeu(provedor)
 		if err != nil {
 			c.HTML(http.StatusOK, "index.html", gin.H{
-				"message": "erro ao atualizar status",
+				"message":   "Erro ao atualizar status",
+				"dashboard": dash,
 			})
 			return
 		}
+
 		contatos, _ := lerPlanilha()
 
 		c.HTML(http.StatusOK, "index.html", gin.H{
-			"message":   "status atualizado para Não Atendeu",
-			"contatos":  contatos,
-			"dashboard": dash,
-		})
-	})
-
-	r.POST("/em-ligacao", func(c *gin.Context) {
-
-		provedor := c.PostForm("provedor")
-
-		AtualizarStatusEmLigacao(provedor)
-
-		contatos, _ := lerPlanilha()
-		dash, _ := GerarDashboard()
-
-		c.HTML(http.StatusOK, "index.html", gin.H{
-			"message":   "Status atualizado para Em ligação",
+			"message":   "Status atualizado com sucesso",
 			"contatos":  contatos,
 			"dashboard": dash,
 		})
 	})
 
 	r.Run(":8080")
-
 }
