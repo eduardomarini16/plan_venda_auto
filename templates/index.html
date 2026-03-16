@@ -48,19 +48,45 @@
 
         /* cores por status */
         .status-novo {
-            background-color: #D0E8FF;
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 5px;
+            border-radius: 5px;
         }
 
-        .status-em-ligacao {
-            background-color: #FFF8B0;
+        .status-contato {
+            background: #fff3cd;
+            color: #856404;
+            padding: 5px;
+            border-radius: 5px;
         }
 
-        .status-ligado {
-            background-color: #D4FFD4;
+        .status-orcamento {
+            background: #d4edda;
+            color: #155724;
+            padding: 5px;
+            border-radius: 5px;
         }
 
-        .status-nao-atendeu {
-            background-color: #FFD6D6;
+        .status-negociacao {
+            background: #cce5ff;
+            color: #004085;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .status-cliente {
+            background: #28a745;
+            color: white;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .status-nao-interessado {
+            background: #dc3545;
+            color: white;
+            padding: 5px;
+            border-radius: 5px;
         }
     </style>
     ```
@@ -81,15 +107,23 @@
         </div>
 
         <div style="background:#FFF8B0; padding:15px;">
-            Em ligação: {{ .dashboard.EmLigacao }}
+            Em contato: {{ .dashboard.EmContato }}
         </div>
 
         <div style="background:#D4FFD4; padding:15px;">
-            Ligados: {{ .dashboard.Ligados }}
+            Orçamento: {{ .dashboard.Orcamento }}
         </div>
 
         <div style="background:#FFD6D6; padding:15px;">
-            Não atendeu: {{ .dashboard.NaoAtendeu }}
+            Negociação: {{ .dashboard.Negociacao }}
+        </div>
+
+        <div style="background:#FFD6D6; padding:15px;">
+            Clientes: {{ .dashboard.Clientes }}
+        </div>
+
+        <div style="background:#FFD6D6; padding:15px;">
+            Não interessado: {{ .dashboard.NaoInteressado }}
         </div>
 
     </div>
@@ -105,9 +139,11 @@
 
         <select name="status" id="status">
             <option value="novo">Novo</option>
-            <option value="em ligação">Em ligação</option>
-            <option value="ligado">Ligado</option>
-            <option value="não atendeu">Não Atendeu</option>
+            <option value="em contato">Em Contato</option>
+            <option value="orçamento">Orçamento</option>
+            <option value="negociação">Negociação</option>
+            <option value="cliente">Cliente</option>
+            <option value="não interessado">Não Interessado</option>
         </select>
 
         <button type="submit">Filtrar</button>
@@ -163,19 +199,16 @@
 
                 {{ if eq .Status "Novo" }}
 
-                <form action="/em-ligacao" method="post" style="display:inline;">
-                    <input type="hidden" name="provedor" value="{{ .Provedor }}">
-                    <button type="submit">Em ligação</button>
+                <form action="/atualizar-status" method="POST">
+                    <input type="hidden" name="provedor" value="{{.Provedor}}">
+                    <input type="hidden" name="status" value="Em contato">
+                    <button>Em contato</button>
                 </form>
 
-                <form action="/liguei" method="post" style="display:inline;">
-                    <input type="hidden" name="provedor" value="{{ .Provedor }}">
-                    <button type="submit">Liguei</button>
-                </form>
-
-                <form action="/nao-atendeu" method="post" style="display:inline;">
-                    <input type="hidden" name="provedor" value="{{ .Provedor }}">
-                    <button type="submit">Não Atendeu</button>
+                <form action="/atualizar-status" method="POST">
+                    <input type="hidden" name="provedor" value="{{.Provedor}}">
+                    <input type="hidden" name="status" value="Orçamento">
+                    <button>Orçamento</button>
                 </form>
 
                 {{ else }}
