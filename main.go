@@ -430,6 +430,44 @@ func main() {
 		})
 	})
 
+	r.GET("/novo", func(c *gin.Context) {
+		dash, _ := GerarDashboard()
+
+		c.HTML(http.StatusOK, "novo.html", gin.H{
+			"dashboard": dash,
+		})
+	})
+
+	r.POST("/novo", func(c *gin.Context) {
+
+		contato := Contato{
+			Provedor:   c.PostForm("provedor"),
+			Cidade:     c.PostForm("cidade"),
+			Estado:     c.PostForm("estado"),
+			Telefone:   c.PostForm("telefone"),
+			Contato:    c.PostForm("contato"),
+			Data:       c.PostForm("data"),
+			Produto:    c.PostForm("produto"),
+			Status:     "Novo",
+			Observacao: c.PostForm("observacao"),
+		}
+
+		err := SalvarContato(contato)
+		dash, _ := GerarDashboard()
+
+		if err != nil {
+			c.HTML(http.StatusOK, "index.html", gin.H{
+				"message":   "Erro ao salvar contato",
+				"dashboard": dash,
+			})
+			return
+		}
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"message":   "Contato adiciona com sucesso",
+			"dashboard": dash,
+		})
+	})
+
 	// FILTRAR STATUS
 	r.GET("/status", func(c *gin.Context) {
 
