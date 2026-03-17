@@ -323,8 +323,9 @@ func BuscarContato(termo string) ([]Contato, error) {
 
 		provedor := strings.ToLower(strings.TrimSpace(row[0]))
 		cidade := strings.ToLower(strings.TrimSpace(row[1]))
+		produto := strings.ToLower(strings.TrimSpace(row[6]))
 
-		if strings.Contains(provedor, termo) || strings.Contains(cidade, termo) {
+		if strings.Contains(provedor, termo) || strings.Contains(cidade, termo) || strings.Contains(produto, termo) {
 
 			contato := Contato{
 				Provedor:   strings.TrimSpace(row[0]),
