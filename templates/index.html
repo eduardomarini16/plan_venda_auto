@@ -5,7 +5,6 @@
 <head>
     <title>Controle de Vendas</title>
 
-    ```
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
@@ -89,13 +88,11 @@
             border-radius: 5px;
         }
     </style>
-    ```
 
 </head>
 
 <body>
 
-    ```
     <h1>Controle de Vendas - Provedores</h1>
 
     <h2>Dashboard</h2>
@@ -147,6 +144,17 @@
         </select>
 
         <button type="submit">Filtrar</button>
+    </form>
+
+    <!-- Busca -->
+    <form action="/buscar" method="get" style="margin-top:10px;">
+
+        <label>Buscar provedor ou cidade:</label>
+
+        <input type="text" name="q" placeholder="Ex: Vero, Pouso Alegre">
+
+        <button type="submit">Buscar</button>
+
     </form>
 
     <!-- listar contatos novos -->
@@ -211,6 +219,8 @@
                     <button>Orçamento</button>
                 </form>
 
+
+
                 {{ else }}
 
                 -
@@ -226,7 +236,6 @@
     </table>
 
     {{ end }}
-    ```
 
 </body>
 

@@ -298,6 +298,54 @@ func GerarDashboard() (Dashboard, error) {
 	return dash, nil
 }
 
+func BuscarContato(termo string) ([]Contato, error) {
+	file, err := excelize.OpenFile("controle_vendas_provedores.xlsx")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	rows, err := file.GetRows("Vendas")
+	if err != nil {
+		return nil, err
+	}
+
+	var contatos []Contato
+
+	for i, row := range rows {
+		if i == 0 {
+			continue
+		}
+
+		if len(row) < 9 {
+			continue
+		}
+
+		provedor := strings.ToLower(strings.TrimSpace(row[0]))
+		cidade := strings.ToLower(strings.TrimSpace(row[1]))
+
+		if strings.Contains(provedor, termo) || strings.Contains(cidade, termo) {
+
+			contato := Contato{
+				Provedor:   strings.TrimSpace(row[0]),
+				Cidade:     strings.TrimSpace(row[1]),
+				Estado:     strings.TrimSpace(row[2]),
+				Telefone:   strings.TrimSpace(row[3]),
+				Contato:    strings.TrimSpace(row[4]),
+				Data:       strings.TrimSpace(row[5]),
+				Produto:    strings.TrimSpace(row[6]),
+				Status:     strings.TrimSpace(row[7]),
+				Observacao: strings.TrimSpace(row[8]),
+			}
+
+			contatos = append(contatos, contato)
+		}
+	}
+
+	return contatos, nil
+
+}
+
 func main() {
 
 	r := gin.Default()
@@ -396,6 +444,18 @@ func main() {
 
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"message":   "Status atualizado com sucesso",
+			"contatos":  contatos,
+			"dashboard": dash,
+		})
+	})
+
+	r.GET("/buscar", func(c *gin.Context) {
+		termo := strings.ToLower(c.Query("q"))
+
+		contatos, _ := BuscarContato(termo)
+		dash, _ := GerarDashboard()
+
+		c.HTML(http.StatusOK, "index.html", gin.H{
 			"contatos":  contatos,
 			"dashboard": dash,
 		})
