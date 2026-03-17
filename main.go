@@ -347,6 +347,33 @@ func BuscarContato(termo string) ([]Contato, error) {
 
 }
 
+func SalvarContato(contato Contato) error {
+
+	f, err := excelize.OpenFile("controle_vendas_provedores.xlsx")
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	rows, err := f.GetRows("Vendas")
+	if err != nil {
+		return err
+	}
+
+	novaLinha := len(rows) + 1
+	f.SetCellValue("Vendas", fmt.Sprintf("A%d", novaLinha), contato.Provedor)
+	f.SetCellValue("Vendas", fmt.Sprintf("B%d", novaLinha), contato.Cidade)
+	f.SetCellValue("Vendas", fmt.Sprintf("C%d", novaLinha), contato.Estado)
+	f.SetCellValue("Vendas", fmt.Sprintf("D%d", novaLinha), contato.Telefone)
+	f.SetCellValue("Vendas", fmt.Sprintf("E%d", novaLinha), contato.Contato)
+	f.SetCellValue("Vendas", fmt.Sprintf("F%d", novaLinha), contato.Data)
+	f.SetCellValue("Vendas", fmt.Sprintf("G%d", novaLinha), contato.Produto)
+	f.SetCellValue("Vendas", fmt.Sprintf("H%d", novaLinha), contato.Status)
+	f.SetCellValue("Vendas", fmt.Sprintf("I%d", novaLinha), contato.Observacao)
+
+	return f.Save()
+}
+
 func main() {
 
 	r := gin.Default()
