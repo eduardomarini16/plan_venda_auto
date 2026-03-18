@@ -2,7 +2,9 @@ package repository
 
 import (
 	"fmt"
+	"os"
 	"strings"
+	"time"
 
 	"github.com/eduardomarini16/plan_venda_auto/models"
 	"github.com/xuri/excelize/v2"
@@ -118,6 +120,17 @@ func ListarTodos() ([]models.Contato, error) {
 }
 
 func SalvarTodos(contatos []models.Contato) error {
+
+	fileName := "controle_vendas_provedores.xlsx"
+
+	// backup  antes de salvar
+	if _, err := os.Stat(fileName); err == nil {
+		backup := fmt.Sprintf("backup_%d.xlsx", time.Now().Unix())
+		err := os.Rename(fileName, backup)
+		if err != nil {
+			return fmt.Errorf("erro ao criar backup: %v", err)
+		}
+	}
 
 	f := excelize.NewFile()
 	sheet := "Vendas"
