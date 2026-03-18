@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Editar Contato</title>
+</head>
+
+<body>
+
+    <h1>Editar Contato</h1>
+
+    <form action="/salvar-edicao" method="POST">
+
+        <input type="hidden" name="provedor_original" value="{{ .contato.Provedor }}">
+
+        <label>Provedor:</label><br>
+        <input type="text" name="provedor" value="{{ .contato.Provedor }}"><br><br>
+
+        <label>Cidade:</label><br>
+        <input type="text" name="cidade" value="{{ .contato.Cidade }}"><br><br>
+
+        <label>Estado:</label><br>
+        <input type="text" name="estado" value="{{ .contato.Estado }}"><br><br>
+
+        <label>Telefone:</label><br>
+        <input type="text" name="telefone" value="{{ .contato.Telefone }}"><br><br>
+
+        <label>Contato:</label><br>
+        <input type="text" name="contato" value="{{ .contato.Contato }}"><br><br>
+
+        <label>Produto:</label><br>
+        <input type="text" name="produto" value="{{ .contato.Produto }}"><br><br>
+
+        <label>Status:</label><br>
+        <select name="status">
+            <option {{if eq .contato.Status "Novo" }}selected{{end}}>Novo</option>
+            <option {{if eq .contato.Status "Em contato" }}selected{{end}}>Em contato</option>
+            <option {{if eq .contato.Status "Orçamento" }}selected{{end}}>Orçamento</option>
+            <option {{if eq .contato.Status "Negociação" }}selected{{end}}>Negociação</option>
+            <option {{if eq .contato.Status "Cliente" }}selected{{end}}>Cliente</option>
+            <option {{if eq .contato.Status "Não interessado" }}selected{{end}}>Não interessado</option>
+        </select><br><br>
+
+        <label>Observação:</label><br>
+        <input type="text" name="observacao" value="{{ .contato.Observacao }}"><br><br>
+
+        <button type="submit">Salvar</button>
+
+    </form>
+
+</body>
+
+</html>
