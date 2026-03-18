@@ -446,6 +446,66 @@ func ListarTodos() ([]Contato, error) {
 	return contatos, nil
 }
 
+func DeletarContato(provedor string) error {
+
+	contatos, err := ListarTodos()
+	if err != nil {
+		return err
+	}
+
+	var novos []Contato
+
+	for _, c := range contatos {
+		if c.Provedor != provedor {
+			novos = append(novos, c)
+		}
+	}
+
+	return SalvarTodos(novos)
+}
+
+func SalvarTodos(contatos []Contato) error {
+
+	f := excelize.NewFile()
+	sheet := "Vendas"
+	f.SetSheetName("Sheet1", sheet)
+
+	// Cabeçalho
+	headers := []string{
+		"Nome do Provedor",
+		"Cidade",
+		"Estado",
+		"Telefone",
+		"Nome do Contato",
+		"Data do Primeiro Contato",
+		"Produto",
+		"Status",
+		"Observação",
+	}
+
+	for i, header := range headers {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		f.SetCellValue(sheet, cell, header)
+	}
+
+	// Dados
+	for i, c := range contatos {
+		linha := i + 2
+
+		f.SetCellValue(sheet, fmt.Sprintf("A%d", linha), c.Provedor)
+		f.SetCellValue(sheet, fmt.Sprintf("B%d", linha), c.Cidade)
+		f.SetCellValue(sheet, fmt.Sprintf("C%d", linha), c.Estado)
+		f.SetCellValue(sheet, fmt.Sprintf("D%d", linha), c.Telefone)
+		f.SetCellValue(sheet, fmt.Sprintf("E%d", linha), c.Contato)
+		f.SetCellValue(sheet, fmt.Sprintf("F%d", linha), c.Data)
+		f.SetCellValue(sheet, fmt.Sprintf("G%d", linha), c.Produto)
+		f.SetCellValue(sheet, fmt.Sprintf("H%d", linha), c.Status)
+		f.SetCellValue(sheet, fmt.Sprintf("I%d", linha), c.Observacao)
+	}
+
+	return f.SaveAs("controle_vendas_provedores.xlsx")
+}
+
 func main() {
 
 	r := gin.Default()
@@ -673,6 +733,19 @@ func main() {
 		file.Save()
 
 		c.Redirect(302, "/listar?msg=editado&provedor="+provedorOriginal)
+	})
+
+	r.POST("/deletar", func(c *gin.Context) {
+
+		provedor := c.PostForm("provedor")
+
+		err := DeletarContato(provedor)
+		if err != nil {
+			c.Redirect(302, "/listar?msg=errodelete")
+			return
+		}
+
+		c.Redirect(302, "/listar?msg=deletado")
 	})
 
 	r.Run(":8080")

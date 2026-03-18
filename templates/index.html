@@ -219,6 +219,13 @@
                     <button type="button">Editar</button>
                 </a>
 
+                <form action="/deletar" method="POST" style="display:inline;">
+                    <input type="hidden" name="provedor" value="{{.Provedor}}">
+                    <button type="submit" onclick="return confirm('Tem certeza que deseja deletar este contato?')">
+                        Deletar
+                    </button>
+                </form>
+
                 <form action="/atualizar-status" method="POST">
                     <input type="hidden" name="provedor" value="{{.Provedor}}">
 
