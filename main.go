@@ -404,6 +404,48 @@ func StatusSelectClass(status string) string {
 	}
 }
 
+func ListarTodos() ([]Contato, error) {
+
+	file, err := excelize.OpenFile("controle_vendas_provedores.xlsx")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	rows, err := file.GetRows("Vendas")
+	if err != nil {
+		return nil, err
+	}
+
+	var contatos []Contato
+
+	for i, row := range rows {
+		if i == 0 {
+			continue
+		}
+
+		if len(row) < 9 {
+			continue
+		}
+
+		contato := Contato{
+			Provedor:   strings.TrimSpace(row[0]),
+			Cidade:     strings.TrimSpace(row[1]),
+			Estado:     strings.TrimSpace(row[2]),
+			Telefone:   strings.TrimSpace(row[3]),
+			Contato:    strings.TrimSpace(row[4]),
+			Data:       strings.TrimSpace(row[5]),
+			Produto:    strings.TrimSpace(row[6]),
+			Status:     strings.TrimSpace(row[7]),
+			Observacao: strings.TrimSpace(row[8]),
+		}
+
+		contatos = append(contatos, contato)
+	}
+
+	return contatos, nil
+}
+
 func main() {
 
 	r := gin.Default()
@@ -567,10 +609,10 @@ func main() {
 	r.GET("/editar", func(c *gin.Context) {
 		provedor := c.Query("provedor")
 
-		contatos, _ := lerPlanilha()
+		contatos, _ := ListarTodos()
 
 		for _, contato := range contatos {
-			if contato.Provedor == provedor {
+			if strings.EqualFold(strings.TrimSpace(contato.Provedor), strings.TrimSpace(provedor)) {
 
 				c.HTML(200, "editar.html", gin.H{
 					"contato": contato,
