@@ -123,6 +123,11 @@
             background: #dc3545;
             color: white;
         }
+
+        .highlight {
+            background-color: #fff3cd !important;
+            transition: 0.5s;
+        }
     </style>
 
 </head>
@@ -196,7 +201,7 @@
 
         {{ range .contatos }}
 
-        <tr class="{{ statusClass .Status }}">
+        <tr class="{{ statusClass .Status }} {{if eq .Provedor $.provedorEditado}}highlight{{end}}">
             <td>{{ .Provedor }}</td>
             <td>{{ .Cidade }}</td>
             <td>{{ .Estado }}</td>
@@ -254,6 +259,13 @@
     </table>
 
     {{ end }}
+
+    <script>
+        setTimeout(() => {
+            const msg = document.querySelector('.message');
+            if (msg) msg.style.display = 'none';
+        }, 3000);
+    </script>
 
 </body>
 
