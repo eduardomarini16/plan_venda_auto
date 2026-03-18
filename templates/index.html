@@ -45,7 +45,6 @@
             font-weight: bold;
         }
 
-        /* cores por status */
         .status-novo {
             background: #d1ecf1;
             color: #0c5460;
@@ -87,6 +86,43 @@
             padding: 5px;
             border-radius: 5px;
         }
+
+        .status-select {
+            padding: 5px;
+            border-radius: 5px;
+            border: none;
+            font-weight: bold;
+        }
+
+        .select-novo {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .select-contato {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .select-orcamento {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .select-negociacao {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .select-cliente {
+            background: #28a745;
+            color: white;
+        }
+
+        .select-nao-interessado {
+            background: #dc3545;
+            color: white;
+        }
     </style>
 
 </head>
@@ -98,84 +134,53 @@
     <h2>Dashboard</h2>
 
     <div style="display:flex; gap:20px; margin-bottom:20px;">
-
-        <div style="background:#D0E8FF; padding:15px;">
-            Novos: {{ .dashboard.Novos }}
-        </div>
-
-        <div style="background:#FFF8B0; padding:15px;">
-            Em contato: {{ .dashboard.EmContato }}
-        </div>
-
-        <div style="background:#D4FFD4; padding:15px;">
-            Orçamento: {{ .dashboard.Orcamento }}
-        </div>
-
-        <div style="background:#FFD6D6; padding:15px;">
-            Negociação: {{ .dashboard.Negociacao }}
-        </div>
-
-        <div style="background:#FFD6D6; padding:15px;">
-            Clientes: {{ .dashboard.Clientes }}
-        </div>
-
-        <div style="background:#FFD6D6; padding:15px;">
-            Não interessado: {{ .dashboard.NaoInteressado }}
-        </div>
-
+        <div style="background:#D0E8FF; padding:15px;">Novos: {{ .dashboard.Novos }}</div>
+        <div style="background:#FFF8B0; padding:15px;">Em contato: {{ .dashboard.EmContato }}</div>
+        <div style="background:#D4FFD4; padding:15px;">Orçamento: {{ .dashboard.Orcamento }}</div>
+        <div style="background:#FFD6D6; padding:15px;">Negociação: {{ .dashboard.Negociacao }}</div>
+        <div style="background:#FFD6D6; padding:15px;">Clientes: {{ .dashboard.Clientes }}</div>
+        <div style="background:#FFD6D6; padding:15px;">Não interessado: {{ .dashboard.NaoInteressado }}</div>
     </div>
 
-    <!-- Criar planilha -->
     <form action="/criar" method="post">
         <button type="submit">Criar Planilha</button>
     </form>
 
-    <!-- Filtro por status -->
     <form action="/status" method="get">
-        <label for="status">Filtrar por status:</label>
+        <label>Filtrar por status:</label>
 
-        <select name="status" id="status">
-            <option value="novo">Novo</option>
-            <option value="em contato">Em Contato</option>
-            <option value="orçamento">Orçamento</option>
-            <option value="negociação">Negociação</option>
-            <option value="cliente">Cliente</option>
-            <option value="não interessado">Não Interessado</option>
+        <select name="status" class="status-select" onchange="this.form.submit()">
+
+            <option value="Novo">Novo</option>
+            <option value="Em contato">Em contato</option>
+            <option value="Orçamento">Orçamento</option>
+            <option value="Negociação">Negociação</option>
+            <option value="Cliente">Cliente</option>
+            <option value="Não interessado">Não interessado</option>
+
         </select>
 
         <button type="submit">Filtrar</button>
     </form>
 
-    <!-- Busca -->
     <form action="/buscar" method="get" style="margin-top:10px;">
-
-        <label>Buscar por provedor / cidade / produto:</label>
-
+        <label>Buscar:</label>
         <input type="text" name="q" placeholder="Ex: Vero, Pouso Alegre, OLT">
-
         <button type="submit">Buscar</button>
-
     </form>
 
-    <!-- listar contatos novos -->
-    <a href="/listar">
-        <button>Listar Contatos Novos</button>
-    </a>
+    <a href="/novo"><button>+ Novo Contato</button></a>
+    <a href="/listar"><button>Listar Contatos Novos</button></a>
 
-    <!-- mensagem -->
     {{ if .message }}
-    <div class="message">
-        {{ .message }}
-    </div>
+    <div class="message">{{ .message }}</div>
     {{ end }}
 
-    <!-- tabela -->
     {{ if .contatos }}
 
     <h2>Contatos</h2>
 
     <table>
-
         <tr>
             <th>Provedor</th>
             <th>Cidade</th>
@@ -192,7 +197,6 @@
         {{ range .contatos }}
 
         <tr class="{{ statusClass .Status }}">
-
             <td>{{ .Provedor }}</td>
             <td>{{ .Cidade }}</td>
             <td>{{ .Estado }}</td>
@@ -203,30 +207,39 @@
             <td>{{ .Status }}</td>
             <td>{{ .Observacao }}</td>
 
+            <!-- 🔥 AQUI ESTÁ A MUDANÇA -->
             <td>
-
-                {{ if eq .Status "Novo" }}
-
                 <form action="/atualizar-status" method="POST">
                     <input type="hidden" name="provedor" value="{{.Provedor}}">
-                    <input type="hidden" name="status" value="Em contato">
-                    <button>Em contato</button>
+
+                    <select name="status" class="status-select {{ StatusSelectClass .Status }}"
+                        onchange="this.form.submit()">
+
+                        <option value="Novo" {{if eq .Status "Novo" }}selected{{end}}>Novo</option>
+
+                        <option value="Em contato" {{if eq .Status "Em contato" }}selected{{end}}>
+                            Em contato
+                        </option>
+
+                        <option value="Orçamento" {{if eq .Status "Orçamento" }}selected{{end}}>
+                            Orçamento
+                        </option>
+
+                        <option value="Negociação" {{if eq .Status "Negociação" }}selected{{end}}>
+                            Negociação
+                        </option>
+
+                        <option value="Cliente" {{if eq .Status "Cliente" }}selected{{end}}>
+                            Cliente
+                        </option>
+
+                        <option value="Não interessado" {{if eq .Status "Não interessado" }}selected{{end}}>
+                            Não interessado
+                        </option>
+
+                    </select>
+
                 </form>
-
-                <form action="/atualizar-status" method="POST">
-                    <input type="hidden" name="provedor" value="{{.Provedor}}">
-                    <input type="hidden" name="status" value="Orçamento">
-                    <button>Orçamento</button>
-                </form>
-
-
-
-                {{ else }}
-
-                -
-
-                {{ end }}
-
             </td>
 
         </tr>
