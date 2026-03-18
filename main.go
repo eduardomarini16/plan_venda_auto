@@ -493,6 +493,15 @@ func main() {
 		contatos, err := lerPlanilha()
 		dash, _ := GerarDashboard()
 
+		msg := c.Query("msg")
+		provedorEditado := c.Query("provedor")
+
+		var message string
+
+		if msg == "editado" {
+			message = "Contato editado com sucesso"
+		}
+
 		if err != nil {
 			c.HTML(http.StatusOK, "index.html", gin.H{
 				"message":   "Erro ao ler planilha",
@@ -502,8 +511,10 @@ func main() {
 		}
 
 		c.HTML(http.StatusOK, "index.html", gin.H{
-			"contatos":  contatos,
-			"dashboard": dash,
+			"contatos":        contatos,
+			"dashboard":       dash,
+			"message":         message,
+			"provedorEditado": provedorEditado,
 		})
 	})
 
@@ -661,7 +672,7 @@ func main() {
 
 		file.Save()
 
-		c.Redirect(302, "/listar")
+		c.Redirect(302, "/listar?msg=editado&provedor="+provedorOriginal)
 	})
 
 	r.Run(":8080")
