@@ -349,6 +349,14 @@ func BuscarContato(termo string) ([]Contato, error) {
 
 func SalvarContato(contato Contato) error {
 
+	if strings.TrimSpace(contato.Provedor) == "" {
+		return fmt.Errorf("provedor não pode ser vazio")
+	}
+
+	if strings.TrimSpace(contato.Telefone) == "" {
+		return fmt.Errorf("telefone é obrigatório")
+	}
+
 	f, err := excelize.OpenFile("controle_vendas_provedores.xlsx")
 	if err != nil {
 		return err
@@ -361,6 +369,9 @@ func SalvarContato(contato Contato) error {
 	}
 
 	novaLinha := len(rows) + 1
+	if novaLinha < 2 {
+		novaLinha = 2
+	}
 	f.SetCellValue("Vendas", fmt.Sprintf("A%d", novaLinha), contato.Provedor)
 	f.SetCellValue("Vendas", fmt.Sprintf("B%d", novaLinha), contato.Cidade)
 	f.SetCellValue("Vendas", fmt.Sprintf("C%d", novaLinha), contato.Estado)
@@ -374,12 +385,36 @@ func SalvarContato(contato Contato) error {
 	return f.Save()
 }
 
+func StatusSelectClass(status string) string {
+	switch strings.ToLower(status) {
+	case "novo":
+		return "select-novo"
+	case "em contato":
+		return "select-contato"
+	case "orçamento":
+		return "select-orcamento"
+	case "negociação":
+		return "select-negociacao"
+	case "cliente":
+		return "select-cliente"
+	case "não interessado":
+		return "select-nao-interessado"
+	default:
+		return ""
+	}
+}
+
 func main() {
 
 	r := gin.Default()
 
 	r.SetFuncMap(template.FuncMap{
 		"statusClass": statusClass,
+	})
+
+	r.SetFuncMap(template.FuncMap{
+		"StatusSelectClass": StatusSelectClass,
+		"statusClass":       statusClass,
 	})
 
 	r.LoadHTMLGlob("templates/*")
@@ -456,6 +491,7 @@ func main() {
 		dash, _ := GerarDashboard()
 
 		if err != nil {
+			fmt.Println("Erro: ", err)
 			c.HTML(http.StatusOK, "index.html", gin.H{
 				"message":   "Erro ao salvar contato",
 				"dashboard": dash,
@@ -525,6 +561,65 @@ func main() {
 			"contatos":  contatos,
 			"dashboard": dash,
 		})
+	})
+
+	//ROTA ABRIR EDIÇÃO
+	r.GET("/editar", func(c *gin.Context) {
+		provedor := c.Query("provedor")
+
+		contatos, _ := lerPlanilha()
+
+		for _, contato := range contatos {
+			if contato.Provedor == provedor {
+
+				c.HTML(200, "editar.html", gin.H{
+					"contato": contato,
+				})
+				return
+			}
+		}
+
+		c.String(404, "Contato não encontrado")
+	})
+
+	// SALVAR EDIÇÃO
+	r.POST("/salvar-edicao", func(c *gin.Context) {
+
+		provedorOriginal := c.PostForm("provedor_original")
+
+		file, _ := excelize.OpenFile("controle_vendas_provedores.xlsx")
+		defer file.Close()
+
+		rows, _ := file.GetRows("Vendas")
+
+		for i, row := range rows {
+			if i == 0 {
+				continue
+			}
+
+			if len(row) < 9 {
+				continue
+			}
+
+			if row[0] == provedorOriginal {
+
+				file.SetCellValue("Vendas", fmt.Sprintf("A%d", i+1), c.PostForm("provedor"))
+				file.SetCellValue("Vendas", fmt.Sprintf("B%d", i+1), c.PostForm("cidade"))
+				file.SetCellValue("Vendas", fmt.Sprintf("C%d", i+1), c.PostForm("estado"))
+				file.SetCellValue("Vendas", fmt.Sprintf("D%d", i+1), c.PostForm("telefone"))
+				file.SetCellValue("Vendas", fmt.Sprintf("E%d", i+1), c.PostForm("contato"))
+				file.SetCellValue("Vendas", fmt.Sprintf("F%d", i+1), "") // data se quiser depois
+				file.SetCellValue("Vendas", fmt.Sprintf("G%d", i+1), c.PostForm("produto"))
+				file.SetCellValue("Vendas", fmt.Sprintf("H%d", i+1), c.PostForm("status"))
+				file.SetCellValue("Vendas", fmt.Sprintf("I%d", i+1), c.PostForm("observacao"))
+
+				break
+			}
+		}
+
+		file.Save()
+
+		c.Redirect(302, "/listar")
 	})
 
 	r.Run(":8080")
