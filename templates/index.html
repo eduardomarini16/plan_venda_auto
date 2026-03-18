@@ -187,6 +187,7 @@
 
     {{ if .message }}
     <div class="message">{{ .message }}</div>
+    <div class="message {{ .messageType }}">{{ .message }}</div>
     {{ end }}
 
     {{ if .contatos }}
