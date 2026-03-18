@@ -557,9 +557,20 @@ func main() {
 		provedorEditado := c.Query("provedor")
 
 		var message string
+		var messageType string
 
 		if msg == "editado" {
 			message = "Contato editado com sucesso"
+		}
+
+		if msg == "deletado" {
+			message = "Contato deletado com sucesso"
+			messageType = "message-sucess"
+		}
+
+		if msg == "errodelete" {
+			message = "Erro ao deletar contato"
+			messageType = "message-error"
 		}
 
 		if err != nil {
@@ -575,6 +586,7 @@ func main() {
 			"dashboard":       dash,
 			"message":         message,
 			"provedorEditado": provedorEditado,
+			"messageType":     messageType,
 		})
 	})
 
