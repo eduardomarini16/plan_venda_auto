@@ -12,6 +12,7 @@
     <form action="/salvar-edicao" method="POST">
 
         <input type="hidden" name="provedor_original" value="{{ .contato.Provedor }}">
+        <input type="hidden" name="status" value="{{.contato.Status}}">
 
         <label>Provedor:</label><br>
         <input type="text" name="provedor" value="{{ .contato.Provedor }}"><br><br>
