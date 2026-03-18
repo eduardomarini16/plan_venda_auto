@@ -207,8 +207,13 @@
             <td>{{ .Status }}</td>
             <td>{{ .Observacao }}</td>
 
-            <!-- 🔥 AQUI ESTÁ A MUDANÇA -->
             <td>
+
+                <!-- BOTÃO EDITAR -->
+                <a href="/editar?provedor={{.Provedor}}">
+                    <button type="button">Editar</button>
+                </a>
+
                 <form action="/atualizar-status" method="POST">
                     <input type="hidden" name="provedor" value="{{.Provedor}}">
 
