@@ -267,6 +267,15 @@ func SalvarContato(contato models.Contato) error {
 		return fmt.Errorf("telefone é obrigatório")
 	}
 
+	existe, err := ContatoExiste(contato.Provedor)
+	if err != nil {
+		return err
+	}
+
+	if existe {
+		return fmt.Errorf("Contato já existe")
+	}
+
 	f, err := excelize.OpenFile("controle_vendas_provedores.xlsx")
 	if err != nil {
 		return err
@@ -312,4 +321,34 @@ func StatusSelectClass(status string) string {
 	default:
 		return ""
 	}
+}
+
+func ContatoExiste(provedor string) (bool, error) {
+	file, err := excelize.OpenFile("lcontrole_vendas_provedores.xlsx")
+	if err != nil {
+		return false, err
+	}
+	defer file.Close()
+
+	rows, err := file.GetRows("Vendas")
+	if err != nil {
+		return false, err
+	}
+
+	for i, row := range rows {
+		if i == 0 {
+			continue
+		}
+
+		if len(row) < 1 {
+			continue
+		}
+
+		nome := strings.TrimSpace(row[0])
+
+		if strings.EqualFold(nome, strings.TrimSpace(provedor)) {
+			return true, nil
+		}
+	}
+	return false, nil
 }

@@ -127,7 +127,7 @@ func main() {
 		if err != nil {
 			fmt.Println("Erro: ", err)
 			c.HTML(http.StatusOK, "index.html", gin.H{
-				"message":   "Erro ao salvar contato",
+				"message":   err.Error(),
 				"dashboard": dash,
 			})
 			return
