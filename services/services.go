@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/eduardomarini16/plan_venda_auto/models"
+	repository "github.com/eduardomarini16/plan_venda_auto/repository"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -351,4 +352,28 @@ func ContatoExiste(provedor string) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+func ListarPaginado(pagina int, limite int) ([]models.Contato, int, error) {
+
+	todos, err := repository.ListarTodos()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	total := len(todos)
+
+	inicio := (pagina - 1) * limite
+	fim := inicio + limite
+
+	if inicio > total {
+		return []models.Contato{}, total, nil
+	}
+
+	if fim > total {
+		fim = total
+	}
+
+	return todos[inicio:fim], total, nil
+
 }
