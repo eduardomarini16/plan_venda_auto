@@ -26,6 +26,8 @@ func main() {
 	r.SetFuncMap(template.FuncMap{
 		"StatusSelectClass": services.StatusSelectClass,
 		"statusClass":       services.StatusClass,
+		"inc":               func(i int) int { return i + 1 },
+		"dec":               func(i int) int { return i - 1 },
 	})
 
 	r.LoadHTMLGlob("templates/*")
