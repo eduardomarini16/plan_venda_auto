@@ -59,8 +59,28 @@ func main() {
 	// LISTAR
 	r.GET("/listar", func(c *gin.Context) {
 
-		contatos, err := services.LerPlanilha()
+		paginaStr := c.DefaultQuery("page", "1")
+		var pagina int
+		fmt.Scanf(paginaStr, "%d", &pagina)
+
+		if pagina < 1 {
+			pagina = 1
+		}
+
+		limite := 10
+
+		contatos, total, err := services.ListarPaginado(pagina, limite)
 		dash, _ := services.GerarDashboard()
+
+		totalPaginas := (total + limite - 1) / limite
+
+		if err != nil {
+			c.HTML(http.StatusOK, "index.html", gin.H{
+				"message":  "Erro ao listar contatos",
+				"dashboar": dash,
+			})
+			return
+		}
 
 		msg := c.Query("msg")
 		provedorEditado := c.Query("provedor")
@@ -96,6 +116,8 @@ func main() {
 			"message":         message,
 			"provedorEditado": provedorEditado,
 			"messageType":     messageType,
+			"pagina":          pagina,
+			"totalPagina":     totalPaginas,
 		})
 	})
 
