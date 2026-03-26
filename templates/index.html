@@ -273,6 +273,22 @@
 
     </table>
 
+    <div style="margin-top:20px;">
+        {{ if gt .pagina 1 }}
+        <a href="/listar?page={{ dec .pagina }}">
+            <button>⬅ Anterior</button>
+        </a>
+        {{ end }}
+
+        Página {{ .pagina }} de {{ .totalPaginas }}
+
+        {{ if lt .pagina .totalPaginas }}
+        <a href="/listar?page={{ inc .pagina }}">
+            <button>Próxima ➡</button>
+        </a>
+        {{ end }}
+    </div>
+
     {{ end }}
 
     <script>
