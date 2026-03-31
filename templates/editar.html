@@ -1,8 +1,30 @@
-<!DOCTYPE html>
 <html>
 
 <head>
     <title>Editar Contato</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            margin: 40px;
+            background: #f5f6fa;
+        }
+
+        input,
+        select {
+            padding: 8px;
+            width: 300px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #00b894;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+    </style>
+
 </head>
 
 <body>
@@ -12,27 +34,20 @@
     <form action="/salvar-edicao" method="POST">
 
         <input type="hidden" name="provedor_original" value="{{ .contato.Provedor }}">
-        <input type="hidden" name="status" value="{{.contato.Status}}">
 
-        <label>Provedor:</label><br>
+        <label>Provedor</label><br>
         <input type="text" name="provedor" value="{{ .contato.Provedor }}"><br><br>
 
-        <label>Cidade:</label><br>
+        <label>Cidade</label><br>
         <input type="text" name="cidade" value="{{ .contato.Cidade }}"><br><br>
 
-        <label>Estado:</label><br>
+        <label>Estado</label><br>
         <input type="text" name="estado" value="{{ .contato.Estado }}"><br><br>
 
-        <label>Telefone:</label><br>
+        <label>Telefone</label><br>
         <input type="text" name="telefone" value="{{ .contato.Telefone }}"><br><br>
 
-        <label>Contato:</label><br>
-        <input type="text" name="contato" value="{{ .contato.Contato }}"><br><br>
-
-        <label>Produto:</label><br>
-        <input type="text" name="produto" value="{{ .contato.Produto }}"><br><br>
-
-        <label>Status:</label><br>
+        <label>Status</label><br>
         <select name="status">
             <option {{if eq .contato.Status "Novo" }}selected{{end}}>Novo</option>
             <option {{if eq .contato.Status "Em contato" }}selected{{end}}>Em contato</option>
@@ -40,10 +55,9 @@
             <option {{if eq .contato.Status "Negociação" }}selected{{end}}>Negociação</option>
             <option {{if eq .contato.Status "Cliente" }}selected{{end}}>Cliente</option>
             <option {{if eq .contato.Status "Não interessado" }}selected{{end}}>Não interessado</option>
-        </select><br><br>
+        </select>
 
-        <label>Observação:</label><br>
-        <input type="text" name="observacao" value="{{ .contato.Observacao }}"><br><br>
+        <br><br>
 
         <button type="submit">Salvar</button>
 
