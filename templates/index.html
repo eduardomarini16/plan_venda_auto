@@ -234,9 +234,18 @@
 
             <td>
 
-                <a href="/editar?provedor={{.Provedor}}">
-                    <button type="button">Editar</button>
-                </a>
+                <button type="button" onclick='abrirModal({
+                    provedor: "{{.Provedor}}",
+                    cidade: "{{.Cidade}}",
+                    estado: "{{.Estado}}",
+                    telefone: "{{.Telefone}}",
+                    contato: "{{.Contato}}",
+                    produto: "{{.Produto}}",
+                    status: "{{.Status}}",
+                    observacao: "{{.Observacao}}"
+                })'>
+                    Editar
+                </button>
 
                 <form action="/deletar" method="POST" style="display:inline;">
                     <input type="hidden" name="provedor" value="{{.Provedor}}">
@@ -272,5 +281,28 @@
     {{ end }}
 
 </body>
+
+<script>
+
+    function abrirModal(contato) {
+
+        document.getElementById("modalEditar").style.display = "block"
+
+        document.getElementById("edit_provedor_original").value = contato.provedor
+        document.getElementById("edit_provedor").value = contato.provedor
+        document.getElementById("edit_cidade").value = contato.cidade
+        document.getElementById("edit_estado").value = contato.estado
+        document.getElementById("edit_telefone").value = contato.telefone
+        document.getElementById("edit_contato").value = contato.contato
+        document.getElementById("edit_produto").value = contato.produto
+        document.getElementById("edit_status").value = contato.status
+        document.getElementById("edit_observacao").value = contato.observacao
+    }
+
+    function fecharModal() {
+        document.getElementById("modalEditar").style.display = "none"
+    }
+
+</script>
 
 </html>
