@@ -117,6 +117,57 @@
         }
     </style>
 
+    <div id="modalEditar"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+
+        <div style="background:white; width:500px; margin:50px auto; padding:20px; border-radius:10px;">
+
+            <h2>Editar Contato</h2>
+
+            <form action="/salvar-edicao" method="POST">
+
+                <input type="hidden" id="edit_provedor_original" name="provedor_original">
+
+                <label>Provedor:</label><br>
+                <input type="text" id="edit_provedor" name="provedor"><br><br>
+
+                <label>Cidade:</label><br>
+                <input type="text" id="edit_cidade" name="cidade"><br><br>
+
+                <label>Estado:</label><br>
+                <input type="text" id="edit_estado" name="estado"><br><br>
+
+                <label>Telefone:</label><br>
+                <input type="text" id="edit_telefone" name="telefone"><br><br>
+
+                <label>Contato:</label><br>
+                <input type="text" id="edit_contato" name="contato"><br><br>
+
+                <label>Produto:</label><br>
+                <input type="text" id="edit_produto" name="produto"><br><br>
+
+                <label>Status:</label><br>
+                <select id="edit_status" name="status">
+                    <option> Novo </option>
+                    <option> Em contato </option>
+                    <option> Orçamento </option>
+                    <option> Negociação </option>
+                    <option> Cliente </option>
+                    <option> Não interessado </option>
+                </select><br><br>
+
+                <label>Observação:</label><br>
+                <input type="text" id="edit_observacao" name="observacao"><br><br>
+
+                <button type="submit">Salvar</button>
+                <button type="button" onclick="fecharModal()">Cancelar</button>
+
+            </form>
+
+        </div>
+
+    </div>
+
 <body>
 
     <h1>Controle de Vendas - Provedores</h1>
