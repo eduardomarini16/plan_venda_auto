@@ -19,6 +19,8 @@ func main() {
 
 	r := gin.Default()
 
+	r.SetTrustedProxies([]string{"127.0.0.1"})
+
 	r.SetFuncMap(template.FuncMap{
 		"statusClass": services.StatusClass,
 	})
@@ -178,8 +180,10 @@ func main() {
 		}
 
 		c.HTML(http.StatusOK, "index.html", gin.H{
-			"contatos":  contatos,
-			"dashboard": dash,
+			"contatos":    contatos,
+			"dashboard":   dash,
+			"pagina":      1,
+			"totalPagina": 1,
 		})
 	})
 
@@ -277,7 +281,7 @@ func main() {
 
 		file.Save()
 
-		c.Redirect(302, "/listar?msg=editado&provedor="+provedorOriginal)
+		c.Redirect(http.StatusFound, "/listar?msg=editado")
 	})
 
 	r.POST("/deletar", func(c *gin.Context) {

@@ -262,7 +262,7 @@
 
     <div class="pagination">
 
-        {{ if gt .pagina 1 }}
+        {{ if and .pagina (gt .pagina 1) }}
         <a href="?page={{ dec .pagina }}">
             <button>Anterior</button>
         </a>
@@ -270,7 +270,7 @@
 
         Página {{ .pagina }} de {{ .totalPaginas }}
 
-        {{ if lt .pagina .totalPaginas }}
+        {{ if and .totalPaginas (lt .pagina .totalPaginas) }}
         <a href="?page={{ inc .pagina }}">
             <button>Próxima</button>
         </a>
@@ -303,6 +303,16 @@
         document.getElementById("modalEditar").style.display = "none"
     }
 
+</script>
+
+<script>
+    window.onload = function () {
+        const params = new URLSearchParams(window.location.search);
+
+        if (params.get("msg") === "editado") {
+            fecharModal()
+        }
+    }
 </script>
 
 </html>
